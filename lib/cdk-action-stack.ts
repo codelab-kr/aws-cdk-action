@@ -19,7 +19,7 @@ export class CdkActionStack extends cdk.Stack {
     const lambdaFunction = new lambda.Function(this, 'LambdaFunction', {
       runtime: lambda.Runtime.PYTHON_3_12,
       code: lambda.Code.fromAsset('lambda.zip'),
-      handler: 'main.handler',
+      handler: 'main.app',
       environment: {
         VERSION: process.env.VERSION || '0.0',
         TABLE_NAME: table.tableName,
