@@ -19,7 +19,7 @@ export class CdkActionStack extends cdk.Stack {
     const lambdaFunction = new lambda.Function(this, 'LambdaFunction', {
       runtime: lambda.Runtime.PYTHON_3_12,
       code: lambda.Code.fromAsset('lambda'),
-      handler: 'main.handler',
+      handler: 'main.Book.handler',
       environment: {
         VERSION: process.env.VERSION || '0.0',
         TABLE_NAME: table.tableName,
@@ -27,7 +27,7 @@ export class CdkActionStack extends cdk.Stack {
     });
 
     table.grantReadWriteData(lambdaFunction);
-    
+
 
     const functionUrl = lambdaFunction.addFunctionUrl({
       authType: lambda.FunctionUrlAuthType.NONE,
