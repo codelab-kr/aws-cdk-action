@@ -105,6 +105,18 @@ BETA_AWS_REGION
 ```
 
 ```shell
+git add .
+git commit -m "Add github actions"
+git push origin feature
+```
+
+# Auto Increment Version
+```shell
+cd cdk-action/.git/hooks && cp pre-commit.sample pre-commit
+```
+
+```shell
+
 <br>
 
 
