@@ -50,3 +50,9 @@ http://3.35.209.50/docs
 <br>
 
 # FastAPI Tutorial for Lambda
+```shell
+cd lambda
+pip install -t lib -r requirements.txt
+zip -r ../lambda.zip .
+cd ..
+```
