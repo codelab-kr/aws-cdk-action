@@ -1,71 +1,32 @@
-import json
 import os
-from typing import Literal, Optional
-from uuid import uuid4
-from fastapi import FastAPI, HTTPException
-import random
-from fastapi.encoders import jsonable_encoder
-from pydantic import BaseModel
-from mangum import Mangum  # Import Mangum for AWS Lambda
+import boto3
 
 
-class Book(BaseModel):
-    name: str
-    genre: Literal["fiction", "non-fiction"]
-    price: float
-    book_id: Optional[str] = uuid4().hex
+def handler(event, context):
+    # Raw event data
+    path = event["rawPath"]
+    if path != "/":
+        return {"statusCode": 404, "body": "Not Found"}
 
+    # Get the table name from the environment variable
+    dynamodb = boto3.resource("dynamodb")
+    table = dynamodb.Table(os.getenv("TABLE_NAME"))
 
-BOOKS_FILE = "books.json"
-BOOKS = []
-
-if os.path.exists(BOOKS_FILE):
-    with open(BOOKS_FILE, "r") as f:
-        BOOKS = json.load(f)
-
-app = FastAPI()
-handler = Mangum(app)  # Wrap the FastAPI app with Mangum for AWS Lambda
-
-
-@app.get("/")
-async def root():
-    return {"message": "Welcome to my bookstore app!"}
-
-
-@app.get("/random-book")
-async def random_book():
-    return random.choice(BOOKS)
-
-
-@app.get("/list-books")
-async def list_books():
-    return {"books": BOOKS}
-
-
-@app.get("/book_by_index/{index}")
-async def book_by_index(index: int):
-    if index < len(BOOKS):
-        return BOOKS[index]
+    # Read the visit count from the DynamoDB table (or initialize it if it doesn't exist)
+    response = table.get_item(Key={"key": "visit_count"})
+    if "Item" in response:
+        visit_count = response["Item"]["value"]
     else:
-        raise HTTPException(404, f"Book index {index} out of range ({len(BOOKS)}).")
+        visit_count = 0
 
+    # Increment the visit count and write it back to the table
+    new_visit_count = visit_count + 1
+    table.put_item(Item={"key": "visit_count", "value": new_visit_count})
 
-@app.post("/add-book")
-async def add_book(book: Book):
-    book.book_id = uuid4().hex
-    json_book = jsonable_encoder(book)
-    BOOKS.append(json_book)
-
-    with open(BOOKS_FILE, "w") as f:
-        json.dump(BOOKS, f)
-
-    return {"book_id": book.book_id}
-
-
-@app.get("/get-book")
-async def get_book(book_id: str):
-    for book in BOOKS:
-        if book.book_id == book_id:
-            return book
-
-    raise HTTPException(404, f"Book ID {book_id} not found in database.")
+    version = os.getenv("VERSION", "0.0")
+    response_body = {
+        "message": "Hello, World from Lambda! 🚀 ",
+        "version": version,
+        "visit_count": new_visit_count,
+    }
+    return {"statusCode": 200, "body": response_body}
