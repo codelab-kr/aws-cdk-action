@@ -38,4 +38,6 @@ git commit -m "Deploy FastAPI to AWS Lambda"
 git push
 ```
 
+![alt text](image.png)
+
 https://youtu.be/7-CvGFJNE_o?si=6vDNWKTp2ZtmNWp8
