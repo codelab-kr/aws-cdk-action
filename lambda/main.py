@@ -4,7 +4,7 @@ import boto3
 
 def handler(event, context):
     # Raw event data
-    path = event["rowPath"]
+    path = event["rawPath"]
     if path != "/":
         return {"statusCode": 404, "body": "Not Found"}
 
