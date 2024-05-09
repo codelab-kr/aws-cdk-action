@@ -55,4 +55,6 @@ cd lambda
 pip install -t lib -r requirements.txt
 zip -r ../lambda.zip .
 cd ..
+zip lambda.zip -u main.py
+zip lambda.zip -u books.json
 ```
