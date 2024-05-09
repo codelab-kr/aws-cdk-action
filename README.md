@@ -116,7 +116,36 @@ cd cdk-action/.git/hooks && cp pre-commit.sample pre-commit
 ```
 
 ```shell
+vi pre-commit
+#!/bin/bash
+# .env 파일에서 VERSION 값을 읽어옵니다.
+VERSION=$(sed -n 's/VERSION="\([^"]*\)"/\1/p' .env)
 
+if [[ -n "$VERSION" ]]; then
+	# 버전을 증가시킵니다.
+	IFS='.' read -ra ADDR <<< "$VERSION"
+	last_index=$(( ${#ADDR[@]}-1 ))
+	ADDR[last_index]=$((${ADDR[last_index]} + 1))
+	NEW_VERSION=$(IFS=.; echo "${ADDR[*]}")
+
+	# .env 파일에서 이전 버전을 새 버전으로 교체합니다.
+	perl -pi -e "s/$VERSION/$NEW_VERSION/g" .env
+	echo "New version: $NEW_VERSION"
+
+	# 변경된 .env 파일을 git에 추가합니다.
+	git add .env
+fi
+```
+
+```shell
+git add .
+git commit -m "Add auto increment version"
+New version: 1.1
+[feature a65ebe9] add version
+ 7 files changed, 66 insertions(+), 7 deletions(-)
+ create mode 100644 .env
+ create mode 100755 pre-commit
+```
 <br>
 
 

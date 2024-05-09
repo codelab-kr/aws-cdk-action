@@ -18,8 +18,17 @@ jobs:
         with:
           node-version: 20
 
+      - name: Cache node_modules
+        id: cache
+        uses: actions/cache@v2
+        with:
+          path: ./node_modules
+          key: ${{ runner.os }}-node-${{ hashFiles('./package-lock.json') }}
+
       - name: Install AWS CDK
+        working-directory: ./
         run: npm ci
+        if: steps.cache.outputs.cache-hit != 'true'
 
       - name: Deploy CDK
         working-directory: ./
